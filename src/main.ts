@@ -31,18 +31,18 @@ app.get("/produtos",async(req,res)=>{
 
 app.post("/produtos",async(req,res)=>{
     try{
-        const conexao = await mysql.createConnection({
-            host: process.env.dbhost?process.env.dbhost:"localhost",
-            user:process.env.dbuser?process.env.dbuser:"root",
-            password:process.env.dbpassword?process.env.dbpassword:"",
-            database:process.env.dbname?process.env.dbname:"banco1022b",
-            port:process.env.dbport?parseInt(process.env.dbport):3306
-        })
         const {id,nome,descricao,preco,imagem} = req.body
-        const [result,fields]  = 
-            await conexao.query("INSERT INTO produtos VALUES (?,?,?,?,?)",
-                [id,nome,descricao,preco,imagem])
-        await conexao.end()
+        
+        const banco = new BancoMysql();
+        
+        const sqlString  = "INSERT INTO produtos VALUES (?,?,?,?,?)"
+        const parametros = [id,nome,descricao,preco,imagem]
+
+        const result = await banco.query(sqlString,parametros)
+        console.log(result)
+        
+        await banco.end()
+        
         res.status(200).send(result)
     }catch(e){
         console.log(e)
@@ -50,6 +50,14 @@ app.post("/produtos",async(req,res)=>{
     }  
 })
 
+app.delete("/produtos/:id",(req,res)=>{
+    console.log("Tentando excluir o produto de id:",req.params.id)
+    res.send("Tentando excluir o produto de id:"+req.params.id)
+})
+app.put("/produtos/:id",(req,res)=>{
+    console.log("Tentando alterar o produto de id:",req.params.id)
+    res.send("Tentando alterar o produto de id:"+req.params.id)
+})
 
 
 

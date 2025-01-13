@@ -15,7 +15,7 @@ class BancoMysql {
         });
     }
 
-    async query(queryString:string) {
+    async query(queryString:string,params?:Array<any>) {
         const conn = await this.conexao; 
         const [result, fields] = await conn.query(queryString);
         return result;

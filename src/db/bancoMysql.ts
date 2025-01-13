@@ -15,9 +15,9 @@ class BancoMysql {
         });
     }
 
-    async query() {
+    async query(queryString:string) {
         const conn = await this.conexao; 
-        const [result, fields] = await conn.query("SELECT * FROM produtos");
+        const [result, fields] = await conn.query(queryString);
         return result;
     }
 

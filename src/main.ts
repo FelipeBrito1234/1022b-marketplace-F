@@ -19,7 +19,7 @@ import BancoMysql from './db/bancoMysql'
 app.get("/produtos",async(req,res)=>{
     try{
         const banco = new BancoMysql();
-        const result = await banco.query()
+        const result = await banco.query("SELECT * FROM produtos")
         console.log(result)
         await banco.end()
         res.send(result)

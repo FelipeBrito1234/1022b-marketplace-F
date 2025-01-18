@@ -15,10 +15,11 @@ app.use(cors())
 //ROTAS
 
 import BancoMysql from './db/bancoMysql'
+import BancoMongo from './db/banco-mongo'
 
 app.get("/produtos",async(req,res)=>{
     try{
-        const banco = new BancoMysql();
+        const banco = new BancoMongo();
         const result = await banco.listar()
         console.log(result)
         await banco.end()
@@ -33,7 +34,7 @@ app.post("/produtos",async(req,res)=>{
     try{
         const {id,nome,descricao,preco,imagem} = req.body
         console.log(id,nome,descricao,preco,imagem)
-        const banco = new BancoMysql();
+        const banco = new BancoMongo();
 
         const produto = {id,nome,descricao,preco,imagem}
 
@@ -55,7 +56,7 @@ app.delete("/produtos/:id",async (req,res)=>{
         const sqlQuery = "DELETE FROM produtos WHERE id = ?"
         const parametro = [req.params.id]
 
-        const banco = new BancoMysql();
+        const banco = new BancoMongo();
 
         const result = await banco.excluir(req.params.id)
 
@@ -72,7 +73,7 @@ app.put("/produtos/:id",async (req,res)=>{
         //const sqlQuery = "UPDATE produtos SET nome=?,descricao=?,preco=?,imagem=? WHERE id = ?"
         const produto = {nome,descricao,preco,imagem}
 
-        const banco = new BancoMysql();
+        const banco = new BancoMongo();
 
         const result = await banco.alterar(req.params.id,produto)
 

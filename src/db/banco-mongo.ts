@@ -35,12 +35,12 @@ class BancoMongo{
     }
     async excluir(id:string){
         const conn = await this.getConnection()
-        const result = await conn.collection("produtos").deleteOne({id})
+        const result = await conn.collection("produtos").deleteOne({id:parseInt(id)})
         return result
     }
     async alterar(id:string,produto:{id?:string,nome:string,descricao:string,preco:string,imagem:string}){
         const conn = await this.getConnection()
-        const result = await conn.collection("produtos").updateOne({id},{$set:produto})
+        const result = await conn.collection("produtos").updateOne({id:parseInt(id)},{$set:produto})
         return result
     }
 

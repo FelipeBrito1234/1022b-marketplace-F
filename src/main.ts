@@ -1,92 +1,81 @@
-// LIVE SERVER é do FRONT-END
-// QUEM É O LIVE SERVER DO BACK-END?
-
-// 1 - Para construir um servidor back-end e responder
-// Vamos utilizar o EXPRESS
 import express from 'express'
-import cors from 'cors'
 import mysql from 'mysql2/promise'
-//Criar um objeto do tipo express.
-const app = express()
-//incluir pra ele receber json
-app.use(express.json())  //Middleware
-//incluir o CORS -> QUANDO A GENTE TEM OUTRA PORTA FAZENDO REQUISIÇÃO PARA A PORTA DO SERVIDOR
-app.use(cors())
-//ROTAS
-
+import cors from 'cors'
 import BancoMysql from './db/bancoMysql'
 import BancoMongo from './db/banco-mongo'
 
-app.get("/produtos",async(req,res)=>{
-    try{
-        const banco = new BancoMongo();
+const app = express()
+app.use(express.json())
+app.use(cors())
+
+
+app.get("/produtos", async (req, res) => {
+    try {
+        const banco = new BancoMongo()
+        await banco.criarConexao()
         const result = await banco.listar()
-        console.log(result)
-        await banco.end()
+        await banco.finalizarConexao()
         res.send(result)
-    }catch(e){
+    } catch (e) {
         console.log(e)
-        res.status(500).send("Erro do servidor")
-    }  
+        res.status(500).send("Server ERROR")
+    }
 })
-
-app.post("/produtos",async(req,res)=>{
-    try{
+app.get("/produtos/:id", async (req, res) => {
+    try {
+        
+        const banco = new BancoMongo()
+        await banco.criarConexao()
+        const result = await banco.listarPorId(req.params.id)
+        await banco.finalizarConexao()
+        res.send(result)
+    } catch (e) {
+        console.log(e)
+        res.status(500).send("Server ERROR")
+    }
+})
+app.post("/produtos", async (req, res) => {
+    try {
         const {id,nome,descricao,preco,imagem} = req.body
-        console.log(id,nome,descricao,preco,imagem)
-        const banco = new BancoMongo();
-
-        const produto = {id,nome,descricao,preco,imagem}
-
+        const banco = new BancoMongo()
+        await banco.criarConexao()
+        const produto = {id:parseInt(id),nome,descricao,preco,imagem}
         const result = await banco.inserir(produto)
-        console.log(result)
-        
-        await banco.end()
-        
-        res.status(200).send(result)
-    }catch(e){
+        await banco.finalizarConexao()
+        res.send(result) 
+    } catch (e) {
         console.log(e)
-        res.status(500).send("Erro do servidor")
-    }  
+        res.status(500).send(e)
+    }
 })
 
-app.delete("/produtos/:id",async (req,res)=>{
-    console.log("Tentando excluir o produto de id:",req.params.id)
+//DELETAR
+app.delete("/produtos/:id",async(req,res)=>{
     try{
-        const sqlQuery = "DELETE FROM produtos WHERE id = ?"
-        const parametro = [req.params.id]
-
-        const banco = new BancoMongo();
-
+        const banco = new BancoMongo()
+        await banco.criarConexao()
         const result = await banco.excluir(req.params.id)
-
-        res.status(200).send(result)
-    }catch(e){
-        console.log(e)
-        res.status(500).send("Erro do servidor")
+        await banco.finalizarConexao()
+        res.status(200).send("Produto excluido com sucesso id: "+req.params.id)
     }
-})
-app.put("/produtos/:id",async (req,res)=>{
-    console.log("Tentando alterar o produto de id:",req.params.id)
-    try{
-        const {nome,descricao,preco,imagem} = req.body
-        //const sqlQuery = "UPDATE produtos SET nome=?,descricao=?,preco=?,imagem=? WHERE id = ?"
-        const produto = {nome,descricao,preco,imagem}
-
-        const banco = new BancoMongo();
-
-        const result = await banco.alterar(req.params.id,produto)
-
-        res.status(200).send(result)
-    }catch(e){
+    catch(e){
         console.log(e)
-        res.status(500).send("Erro do servidor")
+        res.status(500).send("Erro ao excluir")
     }
+    
 })
 
+//ALTERAR
+app.put("/produtos/:id",async(req,res)=>{
+    const {nome,descricao,preco,imagem} = req.body
+    const produto = {nome,descricao,preco,imagem}
+    const banco = new BancoMongo()
+    await banco.criarConexao()
+    const result = await banco.alterar(req.params.id,produto)
+    await banco.finalizarConexao()
+    res.status(200).send("Produto alterado com sucesso id: "+req.params.id)
+})
 
-
-//INICIAR O SERVIDOR
-app.listen(8000,()=>{
-    console.log("SERVIDOR INICIADO NA PORTA 8000")
+app.listen(8000, () => {
+    console.log("Iniciei o servidor")
 })
